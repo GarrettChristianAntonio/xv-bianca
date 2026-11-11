@@ -793,6 +793,29 @@ html{scroll-behavior:smooth}
 .musica.sonando .barras i:nth-child(4){animation-delay:.45s}
 @keyframes ecual{0%,100%{height:5px}50%{height:18px}}
 
+/* ---------- invitados: fotos y canciones ---------- */
+.botonera{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:22px 0 0}
+.form.claro{max-width:440px;margin-inline:auto}
+.form.claro label{color:var(--tinta-tenue);opacity:1}
+.form.claro input{background:var(--carta-a);border:1px solid var(--linea);color:var(--tinta)}
+.form.claro input:focus-visible{border-color:var(--acento)}
+.form.claro .boton{justify-self:center}
+.pedidas{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pedidas li{
+  font-family:var(--sans);
+  font-size:.74rem;
+  letter-spacing:.03em;
+  line-height:1.3;
+  padding:7px 13px;
+  border:1px solid var(--acento-claro);
+  border-radius:999px;
+  background:var(--carta-a);
+  color:var(--tinta);
+  animation:entrarChip .5s cubic-bezier(.2,1.5,.4,1);
+}
+@keyframes entrarChip{from{transform:scale(.5);opacity:0}}
+.nota-form{font-family:var(--sans);font-size:.76rem;line-height:1.6;color:var(--tinta-tenue);text-align:center;margin:0}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition-duration:.001s !important}
   .oculto{opacity:1 !important;transform:none !important;filter:none !important;clip-path:none !important}
@@ -824,7 +847,7 @@ html{scroll-behavior:smooth}
 <button class="musica" id="musica" type="button" aria-label="Pausar o reproducir la música" aria-pressed="false" hidden>
   <span class="barras" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
 </button>
-<audio id="audio" src="musica.mp3" loop preload="auto"></audio>
+<audio id="audio" src="musica.wav" loop preload="auto"></audio>
 
 <canvas id="petalos" aria-hidden="true"></canvas>
 
@@ -963,20 +986,50 @@ html{scroll-behavior:smooth}
   </div>
 </section>
 
-<!-- ============ PLAYLIST ============ -->
+<!-- ============ FOTOS DE INVITADOS ============ -->
 <section class="banda alt">
   <div class="adentro corto">
-    <svg class="icono-evento" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true" data-ap>
-      <path d="M9 18V5l10-2v13"/><circle cx="7" cy="18" r="2.4"/><circle cx="17" cy="16" r="2.4"/>
-    </svg>
-    <h2 class="titulo-script" data-ap>Playlist</h2>
-    <p class="parrafo" data-ap>Sumate a mi lista y recomendá los temas que no pueden faltar en la fiesta.</p>
-    <p data-ap style="margin-top:22px"><a class="boton" id="linkSpotify" href="#" target="_blank" rel="noopener">Ir a Spotify</a></p>
+    <svg class="icono-evento" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true" data-ap><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg>
+    <h2 class="titulo-script" data-ap>Tus fotos con Bianca</h2>
+    <p class="parrafo" data-ap>¿Tenés fotos con ella? Mandalas así las juntamos todas para la fiesta.</p>
+    <p class="botonera" data-ap>
+      <a class="boton lleno" id="fotosWsp" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+      <a class="boton" id="fotosAlbum" href="#" target="_blank" rel="noopener" hidden>Subir al álbum</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============ PLAYLIST ============ -->
+<section class="banda">
+  <div class="adentro corto">
+    <svg class="icono-evento" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true" data-ap><path d="M9 18V5l10-2v13"/><circle cx="7" cy="18" r="2.4"/><circle cx="17" cy="16" r="2.4"/></svg>
+    <h2 class="titulo-script" data-ap>Sumá tu canción</h2>
+    <p class="parrafo" data-ap>¿Qué tema no puede faltar esa noche? Pedilo y se lo pasamos al DJ.</p>
+    <form class="form claro" id="formCancion" data-ap>
+      <div>
+        <label for="cancionTema">Canción</label>
+        <input id="cancionTema" name="tema" type="text" required maxlength="80" placeholder="Nombre del tema">
+      </div>
+      <div class="fila-form">
+        <div>
+          <label for="cancionArtista">Artista</label>
+          <input id="cancionArtista" name="artista" type="text" maxlength="60" placeholder="Quién la canta">
+        </div>
+        <div>
+          <label for="cancionNombre">Tu nombre</label>
+          <input id="cancionNombre" name="nombre" type="text" maxlength="40" placeholder="Quién la pide">
+        </div>
+      </div>
+      <button class="boton lleno" type="submit">Enviar al DJ</button>
+      <p class="nota-form" id="avisoCancion" hidden></p>
+      <ul class="pedidas" id="pedidas" aria-label="Canciones que ya pediste" hidden></ul>
+    </form>
+    <p class="botonera" data-ap><a class="boton" id="linkSpotify" href="#" target="_blank" rel="noopener">Ver la playlist</a></p>
   </div>
 </section>
 
 <!-- ============ REGALOS ============ -->
-<section class="banda">
+<section class="banda alt">
   <div class="adentro corto">
     <svg class="icono-evento" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true" data-ap>
       <rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M3 13h18M12 9v12"/>
@@ -1342,6 +1395,63 @@ document.getElementById('formRsvp').addEventListener('submit', (ev) => {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && !audio.paused) { pausadaSola = true; audio.pause(); }
     else if (!document.hidden && pausadaSola) { pausadaSola = false; audio.play().catch(() => {}); }
+  });
+})();
+
+/* ---------- invitados: fotos y canciones ---------- */
+(function(){
+  // Link a un álbum compartido (Google Fotos, Drive...). Vacío = el botón no aparece.
+  const ALBUM_FOTOS = "";
+  const wsp = (texto) => 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent(texto);
+
+  const fotosWsp = document.getElementById('fotosWsp');
+  if (fotosWsp) fotosWsp.href = wsp('¡Hola! Te mando fotos con ' + CONFIG.nombre + ' para los XV.');
+  const fotosAlbum = document.getElementById('fotosAlbum');
+  if (fotosAlbum && ALBUM_FOTOS) { fotosAlbum.href = ALBUM_FOTOS; fotosAlbum.hidden = false; }
+
+  // el botón de la playlist solo aparece si hay un link real cargado
+  const sp = document.getElementById('linkSpotify');
+  if (sp && /^https:\/\/open\.spotify\.com\/?$/.test(CONFIG.spotify || '')) sp.parentElement.hidden = true;
+
+  const form = document.getElementById('formCancion');
+  if (!form) return;
+  const lista = document.getElementById('pedidas');
+  const aviso = document.getElementById('avisoCancion');
+  const CLAVE = 'xv-bianca-canciones';
+  let pedidas = [];
+  try { pedidas = JSON.parse(localStorage.getItem(CLAVE) || '[]'); } catch (e) { pedidas = []; }
+  if (!Array.isArray(pedidas)) pedidas = [];
+
+  function agregarChip(texto){
+    const li = document.createElement('li');
+    li.textContent = texto;
+    lista.appendChild(li);
+    lista.hidden = false;
+  }
+  pedidas.slice(-12).forEach(agregarChip);
+
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const d = new FormData(form);
+    const tema = (d.get('tema') || '').trim();
+    if (!tema) return;
+    const artista = (d.get('artista') || '').trim();
+    const nombre = (d.get('nombre') || '').trim();
+    const etiqueta = artista ? tema + ' · ' + artista : tema;
+    const mensaje = 'Canción para los XV de ' + CONFIG.nombre + ': ' + tema +
+      (artista ? ' - ' + artista : '') + (nombre ? ' (la pide ' + nombre + ')' : '');
+
+    agregarChip(etiqueta);
+    pedidas.push(etiqueta);
+    try { localStorage.setItem(CLAVE, JSON.stringify(pedidas.slice(-30))); } catch (e) {}
+
+    aviso.hidden = false;
+    aviso.textContent = 'Se abre WhatsApp con tu pedido listo para enviar. Si no se abrió, mandá este mensaje al ' +
+      CONFIG.whatsapp + ': ' + mensaje;
+    window.open(wsp(mensaje), '_blank');
+
+    form.querySelector('#cancionTema').value = '';
+    form.querySelector('#cancionArtista').value = '';
   });
 })();
 
