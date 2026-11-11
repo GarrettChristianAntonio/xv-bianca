@@ -816,6 +816,106 @@ html{scroll-behavior:smooth}
 @keyframes entrarChip{from{transform:scale(.5);opacity:0}}
 .nota-form{font-family:var(--sans);font-size:.76rem;line-height:1.6;color:var(--tinta-tenue);text-align:center;margin:0}
 
+/* ---------- muro compartido ---------- */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.subida{display:grid;gap:12px;justify-items:center;max-width:340px;margin:22px auto 0}
+.campo{
+  width:100%;
+  font-family:var(--serif);
+  font-size:1rem;
+  color:var(--tinta);
+  background:var(--carta-a);
+  border:1px solid var(--linea);
+  border-radius:3px;
+  padding:12px 14px;
+}
+.muro{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:470px;margin:26px auto 0}
+.muro button{
+  position:relative;
+  aspect-ratio:1;
+  padding:0;
+  border:none;
+  border-radius:4px;
+  overflow:hidden;
+  cursor:pointer;
+  background:var(--foto-a);
+  animation:entrarChip .5s cubic-bezier(.2,1.5,.4,1);
+}
+.muro img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s ease}
+.muro button:hover img,.muro button:focus-visible img{transform:scale(1.06)}
+.muro .pendiente img{opacity:.7}
+.muro .pendiente::after{
+  content:"Pendiente";
+  position:absolute;
+  left:0;right:0;bottom:0;
+  padding:4px 2px;
+  font-family:var(--sans);
+  font-size:.54rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#fff;
+  background:rgba(0,0,0,.6);
+}
+.visor{
+  position:fixed;
+  inset:0;
+  z-index:70;
+  display:grid;
+  place-items:center;
+  padding:16px;
+  background:rgba(20,15,10,.93);
+}
+.visor img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
+.visor button{
+  position:absolute;
+  top:max(14px, env(safe-area-inset-top, 0px));
+  right:max(14px, env(safe-area-inset-right, 0px));
+  width:42px;height:42px;
+  border:none;
+  border-radius:50%;
+  background:rgba(255,255,255,.18);
+  color:#fff;
+  font-size:1.5rem;
+  line-height:1;
+  cursor:pointer;
+}
+.lista-dj{max-width:440px;margin:26px auto 0;text-align:left}
+.lista-dj h3{
+  font-family:var(--sans);
+  font-size:.64rem;
+  font-weight:400;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  color:var(--acento-hondo);
+  text-align:center;
+  margin:0 0 12px;
+}
+.lista-dj ol{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:340px;overflow-y:auto}
+.lista-dj li{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 14px;
+  background:var(--carta-a);
+  border:1px solid var(--linea);
+  border-radius:6px;
+  animation:entrarChip .45s cubic-bezier(.2,1.5,.4,1);
+}
+.lista-dj .cual{min-width:0;overflow-wrap:anywhere;line-height:1.35}
+.lista-dj .tema{font-weight:600;color:var(--tinta)}
+.lista-dj .artista{color:var(--tinta-tenue);font-size:.95rem}
+.lista-dj .veces{
+  flex:none;
+  font-family:var(--sans);
+  font-size:.7rem;
+  color:var(--sello-tinta);
+  background:var(--acento-hondo);
+  border-radius:999px;
+  padding:2px 9px;
+  font-variant-numeric:tabular-nums;
+}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition-duration:.001s !important}
   .oculto{opacity:1 !important;transform:none !important;filter:none !important;clip-path:none !important}
@@ -848,6 +948,11 @@ html{scroll-behavior:smooth}
   <span class="barras" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
 </button>
 <audio id="audio" src="musica.wav" loop preload="auto"></audio>
+
+<div class="visor" id="visor" hidden>
+  <img id="visorImg" alt="Foto ampliada">
+  <button type="button" id="visorCerrar" aria-label="Cerrar la foto">&times;</button>
+</div>
 
 <canvas id="petalos" aria-hidden="true"></canvas>
 
@@ -991,11 +1096,20 @@ html{scroll-behavior:smooth}
   <div class="adentro corto">
     <svg class="icono-evento" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true" data-ap><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg>
     <h2 class="titulo-script" data-ap>Tus fotos con Bianca</h2>
-    <p class="parrafo" data-ap>¿Tenés fotos con ella? Mandalas así las juntamos todas para la fiesta.</p>
+    <p class="parrafo" data-ap id="fotosTexto">¿Tenés fotos con ella? Mandalas así las juntamos todas para la fiesta.</p>
+    <div class="subida" id="subida" data-ap hidden>
+      <label class="sr" for="fotoNombre">Tu nombre</label>
+      <input class="campo" id="fotoNombre" type="text" maxlength="40" placeholder="Tu nombre (opcional)">
+      <input id="fotoArchivo" type="file" accept="image/*" multiple hidden>
+      <button class="boton lleno" id="fotoElegir" type="button">Subir fotos</button>
+      <p class="nota-form" id="fotoEstado" aria-live="polite" hidden></p>
+    </div>
     <p class="botonera" data-ap>
       <a class="boton lleno" id="fotosWsp" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
       <a class="boton" id="fotosAlbum" href="#" target="_blank" rel="noopener" hidden>Subir al álbum</a>
     </p>
+    <div class="muro" id="muro" hidden></div>
+    <p class="nota-form" id="muroVacio" style="margin-top:22px" hidden>Todavía no hay fotos en el muro. Subí la primera.</p>
   </div>
 </section>
 
@@ -1020,10 +1134,14 @@ html{scroll-behavior:smooth}
           <input id="cancionNombre" name="nombre" type="text" maxlength="40" placeholder="Quién la pide">
         </div>
       </div>
-      <button class="boton lleno" type="submit">Enviar al DJ</button>
-      <p class="nota-form" id="avisoCancion" hidden></p>
+      <button class="boton lleno" type="submit" id="cancionEnviar">Enviar al DJ</button>
+      <p class="nota-form" id="avisoCancion" aria-live="polite" hidden></p>
       <ul class="pedidas" id="pedidas" aria-label="Canciones que ya pediste" hidden></ul>
     </form>
+    <div class="lista-dj" id="listaDj" hidden>
+      <h3>Lo que ya pidieron</h3>
+      <ol></ol>
+    </div>
     <p class="botonera" data-ap><a class="boton" id="linkSpotify" href="#" target="_blank" rel="noopener">Ver la playlist</a></p>
   </div>
 </section>
@@ -1120,6 +1238,9 @@ const CONFIG = {
   mapa: "https://www.google.com/maps/search/?api=1&query=" +
         encodeURIComponent("Av. Pedro Miguel Araos 325, San Miguel de Tucumán"),
   spotify: "https://open.spotify.com/",
+  // Muro compartido (Supabase). Vacíos = fotos y canciones van por WhatsApp.
+  supabaseUrl: "",
+  supabaseKey: "",   // la clave pública (anon / publishable). NUNCA la service_role.
   whatsapp: "5493813954701"   // número que recibe las confirmaciones, sin + ni espacios. Ej: "5493815551234"
 };
 
@@ -1402,57 +1523,271 @@ document.getElementById('formRsvp').addEventListener('submit', (ev) => {
 (function(){
   // Link a un álbum compartido (Google Fotos, Drive...). Vacío = el botón no aparece.
   const ALBUM_FOTOS = "";
+  const BASE = (CONFIG.supabaseUrl || '').replace(/\/+$/, '');
+  const LLAVE = CONFIG.supabaseKey || '';
+  const hayMuro = !!(BASE && LLAVE);
+  const BUCKET = 'fotos-invitados';
   const wsp = (texto) => 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent(texto);
 
+  function api(ruta, opciones){
+    const o = opciones || {};
+    const cabeceras = Object.assign({ apikey: LLAVE, Authorization: 'Bearer ' + LLAVE }, o.headers || {});
+    return fetch(BASE + ruta, Object.assign({}, o, { headers: cabeceras })).then((r) => {
+      if (!r.ok) return r.text().then((t) => { throw new Error(r.status + ' ' + t.slice(0, 140)); });
+      return r;
+    });
+  }
+  const publica = (ruta) => BASE + '/storage/v1/object/public/' + BUCKET + '/' + ruta;
+
+  /* ----- botones de siempre ----- */
   const fotosWsp = document.getElementById('fotosWsp');
   if (fotosWsp) fotosWsp.href = wsp('¡Hola! Te mando fotos con ' + CONFIG.nombre + ' para los XV.');
   const fotosAlbum = document.getElementById('fotosAlbum');
   if (fotosAlbum && ALBUM_FOTOS) { fotosAlbum.href = ALBUM_FOTOS; fotosAlbum.hidden = false; }
-
-  // el botón de la playlist solo aparece si hay un link real cargado
   const sp = document.getElementById('linkSpotify');
   if (sp && /^https:\/\/open\.spotify\.com\/?$/.test(CONFIG.spotify || '')) sp.parentElement.hidden = true;
 
+  /* ----- canciones ----- */
   const form = document.getElementById('formCancion');
-  if (!form) return;
-  const lista = document.getElementById('pedidas');
+  const chips = document.getElementById('pedidas');
   const aviso = document.getElementById('avisoCancion');
+  const cajaDj = document.getElementById('listaDj');
+  const olDj = cajaDj ? cajaDj.querySelector('ol') : null;
   const CLAVE = 'xv-bianca-canciones';
-  let pedidas = [];
-  try { pedidas = JSON.parse(localStorage.getItem(CLAVE) || '[]'); } catch (e) { pedidas = []; }
-  if (!Array.isArray(pedidas)) pedidas = [];
+  let canciones = [];
+
+  function decir(el, texto){ el.hidden = false; el.textContent = texto; }
+
+  function pintarDj(){
+    const grupos = new Map();
+    canciones.forEach((c) => {
+      const clave = (c.tema + '|' + (c.artista || '')).toLowerCase().replace(/\s+/g, ' ').trim();
+      const g = grupos.get(clave);
+      if (g) g.veces += 1;
+      else grupos.set(clave, { tema: c.tema, artista: c.artista || '', veces: 1 });
+    });
+    olDj.textContent = '';
+    grupos.forEach((g) => {
+      const li = document.createElement('li');
+      const cual = document.createElement('span');
+      cual.className = 'cual';
+      const tema = document.createElement('span');
+      tema.className = 'tema';
+      tema.textContent = g.tema;
+      cual.appendChild(tema);
+      if (g.artista) {
+        const art = document.createElement('span');
+        art.className = 'artista';
+        art.textContent = ' · ' + g.artista;
+        cual.appendChild(art);
+      }
+      li.appendChild(cual);
+      if (g.veces > 1) {
+        const veces = document.createElement('span');
+        veces.className = 'veces';
+        veces.textContent = '×' + g.veces;
+        veces.title = 'La pidieron ' + g.veces + ' veces';
+        li.appendChild(veces);
+      }
+      olDj.appendChild(li);
+    });
+    cajaDj.hidden = grupos.size === 0;
+  }
+  function cargarCanciones(){
+    return api('/rest/v1/canciones?select=tema,artista,creado&order=creado.desc&limit=300')
+      .then((r) => r.json())
+      .then((filas) => { if (Array.isArray(filas)) { canciones = filas; pintarDj(); } })
+      .catch(() => {});
+  }
 
   function agregarChip(texto){
     const li = document.createElement('li');
     li.textContent = texto;
-    lista.appendChild(li);
-    lista.hidden = false;
+    chips.appendChild(li);
+    chips.hidden = false;
   }
-  pedidas.slice(-12).forEach(agregarChip);
+  if (form && !hayMuro) {
+    let guardadas = [];
+    try { guardadas = JSON.parse(localStorage.getItem(CLAVE) || '[]'); } catch (e) { guardadas = []; }
+    if (!Array.isArray(guardadas)) guardadas = [];
+    guardadas.slice(-12).forEach(agregarChip);
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const d = new FormData(form);
+      const tema = (d.get('tema') || '').trim();
+      if (!tema) return;
+      const artista = (d.get('artista') || '').trim();
+      const nombre = (d.get('nombre') || '').trim();
+      const etiqueta = artista ? tema + ' · ' + artista : tema;
+      const mensaje = 'Canción para los XV de ' + CONFIG.nombre + ': ' + tema +
+        (artista ? ' - ' + artista : '') + (nombre ? ' (la pide ' + nombre + ')' : '');
+      agregarChip(etiqueta);
+      guardadas.push(etiqueta);
+      try { localStorage.setItem(CLAVE, JSON.stringify(guardadas.slice(-30))); } catch (e) {}
+      decir(aviso, 'Se abre WhatsApp con tu pedido listo para enviar. Si no se abrió, mandá este mensaje al ' +
+        CONFIG.whatsapp + ': ' + mensaje);
+      window.open(wsp(mensaje), '_blank');
+      form.querySelector('#cancionTema').value = '';
+      form.querySelector('#cancionArtista').value = '';
+    });
+  }
+  if (form && hayMuro) {
+    const enviar = document.getElementById('cancionEnviar');
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const d = new FormData(form);
+      const tema = (d.get('tema') || '').trim();
+      if (!tema) return;
+      const fila = {
+        tema: tema,
+        artista: (d.get('artista') || '').trim() || null,
+        nombre: (d.get('nombre') || '').trim() || null
+      };
+      enviar.disabled = true;
+      decir(aviso, 'Enviando…');
+      api('/rest/v1/canciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify(fila)
+      }).then(() => {
+        canciones.unshift(fila);
+        pintarDj();
+        decir(aviso, '¡Listo! Tu canción ya está en la lista del DJ.');
+        form.querySelector('#cancionTema').value = '';
+        form.querySelector('#cancionArtista').value = '';
+      }).catch(() => {
+        decir(aviso, 'No se pudo guardar tu canción. Revisá la conexión y probá de nuevo.');
+      }).then(() => { enviar.disabled = false; });
+    });
+    cargarCanciones();
+  }
 
-  form.addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const d = new FormData(form);
-    const tema = (d.get('tema') || '').trim();
-    if (!tema) return;
-    const artista = (d.get('artista') || '').trim();
-    const nombre = (d.get('nombre') || '').trim();
-    const etiqueta = artista ? tema + ' · ' + artista : tema;
-    const mensaje = 'Canción para los XV de ' + CONFIG.nombre + ': ' + tema +
-      (artista ? ' - ' + artista : '') + (nombre ? ' (la pide ' + nombre + ')' : '');
+  /* ----- fotos ----- */
+  const subida = document.getElementById('subida');
+  const muro = document.getElementById('muro');
+  const muroVacio = document.getElementById('muroVacio');
+  const visor = document.getElementById('visor');
+  const visorImg = document.getElementById('visorImg');
+  if (!hayMuro || !subida || !muro || !visor) return;
 
-    agregarChip(etiqueta);
-    pedidas.push(etiqueta);
-    try { localStorage.setItem(CLAVE, JSON.stringify(pedidas.slice(-30))); } catch (e) {}
+  const elegir = document.getElementById('fotoElegir');
+  const archivo = document.getElementById('fotoArchivo');
+  const estado = document.getElementById('fotoEstado');
+  const texto = document.getElementById('fotosTexto');
+  subida.hidden = false;
+  if (texto) texto.textContent = '¿Tenés fotos con ella? Subilas y armamos el muro entre todos.';
+  if (fotosWsp) { fotosWsp.classList.remove('lleno'); fotosWsp.textContent = 'O mandalas por WhatsApp'; }
 
-    aviso.hidden = false;
-    aviso.textContent = 'Se abre WhatsApp con tu pedido listo para enviar. Si no se abrió, mandá este mensaje al ' +
-      CONFIG.whatsapp + ': ' + mensaje;
-    window.open(wsp(mensaje), '_blank');
+  let aprobadas = [];
+  let pendientes = [];
 
-    form.querySelector('#cancionTema').value = '';
-    form.querySelector('#cancionArtista').value = '';
+  function abrirVisor(src){ visorImg.src = src; visor.hidden = false; }
+  function cerrarVisor(){ visor.hidden = true; visorImg.removeAttribute('src'); }
+  visor.addEventListener('click', cerrarVisor);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !visor.hidden) cerrarVisor(); });
+
+  function pintarMuro(){
+    muro.textContent = '';
+    const todas = pendientes.map((p) => Object.assign({ pendiente: true }, p)).concat(aprobadas);
+    todas.forEach((f) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      if (f.pendiente) b.className = 'pendiente';
+      b.setAttribute('aria-label', f.nombre ? 'Foto de ' + f.nombre : 'Foto de un invitado');
+      const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = '';
+      img.src = f.local || publica('m-' + f.ruta);
+      b.appendChild(img);
+      b.addEventListener('click', () => abrirVisor(f.localGrande || publica(f.ruta)));
+      muro.appendChild(b);
+    });
+    muro.hidden = todas.length === 0;
+    muroVacio.hidden = todas.length !== 0;
+  }
+  function cargarFotos(){
+    return api('/rest/v1/fotos?select=ruta,nombre,creado&order=creado.desc&limit=60')
+      .then((r) => r.json())
+      .then((filas) => {
+        if (!Array.isArray(filas)) return;
+        aprobadas = filas;
+        const ya = new Set(filas.map((f) => f.ruta));
+        pendientes = pendientes.filter((p) => !ya.has(p.ruta));
+        pintarMuro();
+      })
+      .catch(() => { pintarMuro(); });
+  }
+
+  async function achicar(file, lado, calidad){
+    let bmp;
+    try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+    catch (e) { bmp = await createImageBitmap(file); }
+    const escala = Math.min(1, lado / Math.max(bmp.width, bmp.height));
+    const lienzo = document.createElement('canvas');
+    lienzo.width = Math.max(1, Math.round(bmp.width * escala));
+    lienzo.height = Math.max(1, Math.round(bmp.height * escala));
+    lienzo.getContext('2d').drawImage(bmp, 0, 0, lienzo.width, lienzo.height);
+    if (bmp.close) bmp.close();
+    return new Promise((ok, mal) => {
+      lienzo.toBlob((b) => (b ? ok(b) : mal(new Error('No se pudo convertir la imagen'))), 'image/jpeg', calidad);
+    });
+  }
+  function idNuevo(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    const r = () => Math.random().toString(16).slice(2, 10);
+    return Date.now().toString(16) + '-' + r() + '-' + r();
+  }
+  async function subirUna(file, nombre){
+    const id = idNuevo();
+    const grande = await achicar(file, 1600, 0.82);
+    const chica = await achicar(file, 420, 0.78);
+    const subir = (ruta, blob) => api('/storage/v1/object/' + BUCKET + '/' + ruta, {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'false' },
+      body: blob
+    });
+    await subir(id + '.jpg', grande);
+    await subir('m-' + id + '.jpg', chica);
+    await api('/rest/v1/fotos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ ruta: id + '.jpg', nombre: nombre || null })
+    });
+    return { ruta: id + '.jpg', nombre: nombre, local: URL.createObjectURL(chica), localGrande: URL.createObjectURL(grande) };
+  }
+
+  elegir.addEventListener('click', () => archivo.click());
+  archivo.addEventListener('change', async () => {
+    const lista = Array.from(archivo.files || []).filter((f) => /^image\//.test(f.type) || !f.type).slice(0, 6);
+    if (!lista.length) return;
+    const nombre = (document.getElementById('fotoNombre').value || '').trim();
+    elegir.disabled = true;
+    let bien = 0;
+    let mal = 0;
+    for (let i = 0; i < lista.length; i++) {
+      decir(estado, 'Subiendo foto ' + (i + 1) + ' de ' + lista.length + '…');
+      try {
+        const subidaOk = await subirUna(lista[i], nombre);
+        pendientes.unshift(subidaOk);
+        pintarMuro();
+        bien += 1;
+      } catch (e) {
+        mal += 1;
+      }
+    }
+    archivo.value = '';
+    elegir.disabled = false;
+    if (bien && !mal) decir(estado, (bien === 1 ? '¡Gracias! Tu foto se subió.' : '¡Gracias! Se subieron ' + bien + ' fotos.') + ' Va a aparecer para todos cuando la aprueben.');
+    else if (bien) decir(estado, 'Se subieron ' + bien + ' y fallaron ' + mal + '. Probá de nuevo con las que faltan.');
+    else decir(estado, 'No se pudo subir. Revisá la conexión y probá de nuevo.');
   });
+
+  cargarFotos();
+  setInterval(() => {
+    if (document.hidden) return;
+    cargarFotos();
+    cargarCanciones();
+  }, 60000);
 })();
 
 /* ---------- pétalos, destellos y estallido ---------- */
