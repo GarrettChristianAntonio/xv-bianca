@@ -755,6 +755,44 @@ html{scroll-behavior:smooth}
   .post{margin-inline:-18px;border-radius:0;border-left:none;border-right:none}
 }
 
+/* ---------- mapa ---------- */
+.mapa{
+  width:100%;
+  max-width:470px;
+  margin:8px auto 20px;
+  padding:5px;
+  border:1px solid var(--acento);
+  border-radius:8px;
+  background:var(--carta-a);
+}
+.mapa iframe{display:block;width:100%;height:240px;border:0;border-radius:5px}
+.boton.lleno{background:var(--acento-hondo);border-color:var(--acento-hondo);color:var(--sello-tinta)}
+.boton.lleno:hover,.boton.lleno:focus-visible{background:var(--acento);border-color:var(--acento);color:var(--sello-tinta)}
+
+/* ---------- música ---------- */
+.musica{
+  position:fixed;
+  top:max(16px, env(safe-area-inset-top, 0px));
+  right:max(16px, env(safe-area-inset-right, 0px));
+  z-index:50;
+  width:48px;height:48px;
+  border:none;
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, var(--sello-a), var(--sello-b));
+  color:var(--sello-tinta);
+  box-shadow:0 6px 16px rgba(40,25,20,.28);
+  cursor:pointer;
+  display:grid;
+  place-content:center;
+}
+.musica .barras{display:flex;align-items:flex-end;gap:3px;height:18px}
+.musica .barras i{display:block;width:3px;height:6px;border-radius:2px;background:currentColor}
+.musica.sonando .barras i{animation:ecual .9s ease-in-out infinite}
+.musica.sonando .barras i:nth-child(2){animation-delay:.15s}
+.musica.sonando .barras i:nth-child(3){animation-delay:.3s}
+.musica.sonando .barras i:nth-child(4){animation-delay:.45s}
+@keyframes ecual{0%,100%{height:5px}50%{height:18px}}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition-duration:.001s !important}
   .oculto{opacity:1 !important;transform:none !important;filter:none !important;clip-path:none !important}
@@ -782,6 +820,11 @@ html{scroll-behavior:smooth}
     </button>
   </div>
 </div>
+
+<button class="musica" id="musica" type="button" aria-label="Pausar o reproducir la música" aria-pressed="false" hidden>
+  <span class="barras" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+</button>
+<audio id="audio" src="musica.mp3" loop preload="auto"></audio>
 
 <canvas id="petalos" aria-hidden="true"></canvas>
 
@@ -857,7 +900,8 @@ html{scroll-behavior:smooth}
     <p class="rotulo" data-ap style="margin-bottom:12px">Hasta las 5 am</p><!-- EDITAR -->
     <p class="evento-lugar" data-ap>Av. Pedro Miguel Araos 325</p>
     <p class="evento-dir" data-ap>San Miguel de Tucumán</p>
-    <a class="boton" id="mapaSalon" href="#" target="_blank" rel="noopener" data-ap>
+    <div class="mapa" data-ap><iframe id="mapaVista" title="Mapa del lugar de la fiesta" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+    <a class="boton lleno" id="mapaSalon" href="#" target="_blank" rel="noopener" data-ap>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21s7-6.4 7-11a7 7 0 1 0-14 0c0 4.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
       Cómo llegar
     </a>
@@ -1036,6 +1080,8 @@ document.body.classList.add('cerrado');
 document.getElementById('abrirSobre').addEventListener('click', (ev) => {
   const r = ev.currentTarget.getBoundingClientRect();
   intro.classList.add('abriendo');
+  const pista = document.getElementById('audio');
+  if (pista) { pista.volume = 0.7; pista.play().catch(() => {}); }
   setTimeout(() => {
     intro.classList.add('abierto');
     document.body.classList.remove('cerrado');
@@ -1266,6 +1312,38 @@ document.getElementById('formRsvp').addEventListener('submit', (ev) => {
       mensaje.replace(/\n/g, ' · ');
   }
 });
+
+/* ---------- mapa embebido ---------- */
+(function(){
+  const marco = document.getElementById('mapaVista');
+  if (marco) marco.src = 'https://www.google.com/maps?q=' + encodeURIComponent(CONFIG.lugarAgenda) + '&z=16&output=embed';
+})();
+
+/* ---------- música ---------- */
+(function(){
+  const audio = document.getElementById('audio');
+  const boton = document.getElementById('musica');
+  if (!audio || !boton) return;
+  let pausadaSola = false;
+  function pintar(){
+    const sonando = !audio.paused;
+    boton.classList.toggle('sonando', sonando);
+    boton.setAttribute('aria-pressed', String(sonando));
+  }
+  // el botón solo aparece si el archivo de música existe y se puede reproducir
+  audio.addEventListener('canplay', () => { boton.hidden = false; }, { once: true });
+  audio.addEventListener('play', pintar);
+  audio.addEventListener('pause', pintar);
+  boton.addEventListener('click', () => {
+    if (audio.paused) audio.play().catch(() => {});
+    else audio.pause();
+  });
+  // se pausa sola al salir de la pestaña y vuelve al regresar
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !audio.paused) { pausadaSola = true; audio.pause(); }
+    else if (!document.hidden && pausadaSola) { pausadaSola = false; audio.play().catch(() => {}); }
+  });
+})();
 
 /* ---------- pétalos, destellos y estallido ---------- */
 (function(){
